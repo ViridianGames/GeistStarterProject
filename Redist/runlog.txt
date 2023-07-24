@@ -1,0 +1,22 @@
+Starting Engine::Init()
+Starting Display::Init()
+Starting Display::SetVideoMode(), setting 1024x768
+Initializing GLEW.
+Updating camera.
+Leaving Display::InitializeVideoMode()
+Done With Display::Init()
+Starting Input::Init()
+Done With Input::Init()
+Starting StateMachine::Init
+Leaving StateMachine::Init
+Done with Engine::Init()
+Loading texture Images/cursor.png
+Load successful.
+Loading texture Images/testpattern.png
+Load successful.
+Loading texture Images/gamepad_buttons.png
+Load successful.
+Created state with ID 0
+Entering state: 0
+Loading sound D:/Repos/svn/Projects/Framework/RWIA/Redist/Sounds/RWK/bossshoot.ogg
+Load successful.
