@@ -1,0 +1,247 @@
+cmake_minimum_required(VERSION 3.15)
+
+# Use dynamic runtime library (/MD for Release, /MDd for Debug) to match raylib
+# MUST be set before project() to apply as default policy
+if(MSVC OR MSVC_IDE)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif()
+
+project("GeistStarterProject" VERSION 1.0.0 LANGUAGES C CXX)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Default build type to Release
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Optimization and build settings
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)  # Enable LTO for Release builds only
+
+# Compiler-specific flags
+if(MSVC)
+    # Suppress float-to-int warnings (C4244)
+    add_compile_options(/wd4244)
+    # Suppress truncation from 'double' to 'float' warnings (C4305)
+    add_compile_options(/wd4305)
+    # Suppress CRT security warnings for standard C functions
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    # Declare C++17 for CPP source files
+    add_compile_options(/std:c++17)
+    # Warning level 3
+    add_compile_options(/W3)
+    # Enable Hot Reload / Edit and Continue for Debug builds
+    add_compile_options($<$<CONFIG:Debug>:/ZI>)  # Edit and Continue debug info
+    add_link_options($<$<CONFIG:Debug>:/INCREMENTAL>)  # Incremental linking
+    add_link_options($<$<CONFIG:Debug>:/DEBUG:FASTLINK>)  # Faster linking for Debug builds
+    # Release optimizations (match meson: -O3, LTO, strip)
+    add_compile_options($<$<CONFIG:Release>:/Ox>)  # Maximum optimization
+    add_compile_options($<$<CONFIG:Release>:/GL>)  # Whole Program Optimization (required for LTCG)
+    add_link_options($<$<CONFIG:Release>:/LTCG>)   # Link Time Code Generation (LTO)
+    add_link_options($<$<CONFIG:Release>:/OPT:REF>)  # Remove unreferenced functions/data
+    add_link_options($<$<CONFIG:Release>:/OPT:ICF>)  # Identical COMDAT folding
+    add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)  # Define NDEBUG
+    # RelWithDebInfo configuration for profiling
+    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Zi /O2 /Ob2 /GL /DNDEBUG /Oy-" CACHE STRING "" FORCE)
+    set(CMAKE_C_FLAGS_RELWITHDEBINFO "/MD /Zi /O2 /Ob2 /GL /DNDEBUG /Oy-" CACHE STRING "" FORCE)
+    add_link_options($<$<CONFIG:RelWithDebInfo>:/DEBUG>)   # Generate debug info
+    add_link_options($<$<CONFIG:RelWithDebInfo>:/INCREMENTAL:NO>) # Disable incremental linking (incompatible with OPT)
+    add_link_options($<$<CONFIG:RelWithDebInfo>:/LTCG>)    # Link time code generation
+    add_link_options($<$<CONFIG:RelWithDebInfo>:/OPT:REF>) # Remove unreferenced functions/data
+    add_link_options($<$<CONFIG:RelWithDebInfo>:/OPT:ICF>) # Identical COMDAT folding
+    add_compile_definitions($<$<CONFIG:RelWithDebInfo>:RELEASE_MODE>)  # Define RELEASE_MODE
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    # Maximum warning level
+    add_compile_options(-Wall -Wextra -Wpedantic)
+    # For C4244 equivalent (float-to-int, general conversion issues)
+    add_compile_options(-Wno-conversion)
+    # Release optimizations (match meson: -O3, LTO, strip)
+    add_compile_options($<$<CONFIG:Release>:-O3>)
+    add_compile_options($<$<CONFIG:Release>:-flto>)  # Link Time Optimization
+    add_link_options($<$<CONFIG:Release>:-flto>)     # LTO for linking
+    add_link_options($<$<CONFIG:Release>:-s>)        # Strip symbols
+    add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)  # Define NDEBUG
+endif()
+
+# ============================================================================
+# Raylib Dependency (Prebuilt)
+# ============================================================================
+set(RAYLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/raylib/include)
+set(RAYLIB_EXTERNAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/raylib/external/include)
+
+# Platform-specific library selection
+if(WIN32)
+    set(RAYLIB_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/raylib/lib/raylib.lib)
+else()
+    set(RAYLIB_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/raylib/lib/libraylib.a)
+endif()
+
+# Create imported target for raylib
+add_library(raylib STATIC IMPORTED)
+set_target_properties(raylib PROPERTIES
+        IMPORTED_LOCATION ${RAYLIB_LIBRARY}
+        INTERFACE_INCLUDE_DIRECTORIES "${RAYLIB_INCLUDE_DIR};${RAYLIB_EXTERNAL_INCLUDE}"
+)
+
+# ============================================================================
+# Lua Static Library
+# ============================================================================
+set(LUA_SOURCES
+        ThirdParty/lua/src/lapi.c
+        ThirdParty/lua/src/lcode.c
+        ThirdParty/lua/src/lctype.c
+        ThirdParty/lua/src/ldebug.c
+        ThirdParty/lua/src/ldo.c
+        ThirdParty/lua/src/ldump.c
+        ThirdParty/lua/src/lfunc.c
+        ThirdParty/lua/src/lgc.c
+        ThirdParty/lua/src/llex.c
+        ThirdParty/lua/src/lmem.c
+        ThirdParty/lua/src/lobject.c
+        ThirdParty/lua/src/lopcodes.c
+        ThirdParty/lua/src/lparser.c
+        ThirdParty/lua/src/lstate.c
+        ThirdParty/lua/src/lstring.c
+        ThirdParty/lua/src/ltable.c
+        ThirdParty/lua/src/ltm.c
+        ThirdParty/lua/src/lundump.c
+        ThirdParty/lua/src/lvm.c
+        ThirdParty/lua/src/lzio.c
+        ThirdParty/lua/src/lauxlib.c
+        ThirdParty/lua/src/lbaselib.c
+        ThirdParty/lua/src/lcorolib.c
+        ThirdParty/lua/src/ldblib.c
+        ThirdParty/lua/src/liolib.c
+        ThirdParty/lua/src/lmathlib.c
+        ThirdParty/lua/src/loslib.c
+        ThirdParty/lua/src/lstrlib.c
+        ThirdParty/lua/src/ltablib.c
+        ThirdParty/lua/src/linit.c
+        ThirdParty/lua/src/loadlib.c
+        ThirdParty/lua/src/lutf8lib.c
+)
+
+add_library(lua STATIC ${LUA_SOURCES})
+target_include_directories(lua PUBLIC ThirdParty/lua/src)
+target_compile_definitions(lua PRIVATE LUA_COMPAT_5_3)
+if(WIN32)
+    target_compile_definitions(lua PRIVATE LUA_BUILD_AS_DLL)
+endif()
+
+# Ensure lua uses the same runtime library as the main project
+if(MSVC)
+    set_property(TARGET lua PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif()
+
+# ============================================================================
+# Project Include Directories
+# ============================================================================
+include_directories(
+        Source/Geist
+        Source
+        ThirdParty/nlohmann
+)
+
+# ============================================================================
+# Source Files (Keep alphabetized)
+# ============================================================================
+set(SOURCES
+        Source/Geist/BaseUnits.cpp
+        Source/Geist/Config.cpp
+        Source/Geist/Engine.cpp
+        Source/Geist/Globals.cpp
+        Source/Geist/Gui.cpp
+        Source/Geist/GuiElements.cpp
+        Source/Geist/GuiManager.cpp
+        Source/Geist/InputSystem.cpp
+        Source/Geist/IO.cpp
+        Source/Geist/Logging.cpp
+        Source/Geist/ParticleSystem.cpp
+        Source/Geist/Primitives.cpp
+        Source/Geist/RaylibModel.cpp
+        Source/Geist/ResourceManager.cpp
+        Source/Geist/RNG.cpp
+        Source/Geist/ScriptingSystem.cpp
+        Source/Geist/SoundSystem.cpp
+        Source/Geist/StateMachine.cpp
+        Source/Geist/TooltipSystem.cpp
+
+        Source/GameGlobals.cpp
+        Source/Main.cpp
+        Source/MainState.cpp
+        Source/OptionsState.cpp
+        Source/TitleState.cpp
+)
+
+# Organize files into virtual folders in Visual Studio
+source_group("Geist" REGULAR_EXPRESSION "Source/Geist/.*")
+source_group("Source Files" REGULAR_EXPRESSION "Source/[^/]+\\.cpp")
+
+# ============================================================================
+# Executable
+# ============================================================================
+add_executable(GeistStarterProject WIN32
+        ${SOURCES}
+        $<$<PLATFORM_ID:Windows>:Source/geiststarterproject.rc>
+)
+
+# Build configuration specific definitions
+target_compile_definitions(GeistStarterProject PRIVATE
+        $<$<CONFIG:Debug>:DEBUG_MODE>
+        $<$<CONFIG:Release>:RELEASE_MODE>
+)
+
+# Link dependencies
+target_link_libraries(GeistStarterProject PRIVATE
+        raylib
+        lua
+)
+
+# Additional include directories for dependencies
+target_include_directories(GeistStarterProject PRIVATE
+        ${RAYLIB_EXTERNAL_INCLUDE}
+)
+
+# Windows-specific dependencies
+if(WIN32)
+    target_link_libraries(GeistStarterProject PRIVATE winmm)
+    # Use main() entry point instead of WinMain for GUI app
+    set_target_properties(GeistStarterProject PROPERTIES
+            LINK_FLAGS "/ENTRY:mainCRTStartup"
+    )
+endif()
+
+# Set working directory for running the executable
+if(WIN32)
+    # Visual Studio debugger working directory
+    set_target_properties(GeistStarterProject PROPERTIES
+            VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Redist"
+    )
+    # Copy executable to Redist folder after build (Release only)
+    add_custom_command(TARGET GeistStarterProject POST_BUILD
+            COMMAND $<$<CONFIG:Release>:${CMAKE_COMMAND}> $<$<CONFIG:Release>:-E> $<$<CONFIG:Release>:copy> $<$<CONFIG:Release>:$<TARGET_FILE:GeistStarterProject>> $<$<CONFIG:Release>:"${CMAKE_CURRENT_SOURCE_DIR}/Redist/">
+            COMMAND_EXPAND_LISTS
+            COMMENT "Copying Release executable to Redist folder"
+    )
+    # Copy executable and PDB to Redist folder after build (RelWithDebInfo)
+    add_custom_command(TARGET GeistStarterProject POST_BUILD
+            COMMAND $<$<CONFIG:RelWithDebInfo>:${CMAKE_COMMAND}> $<$<CONFIG:RelWithDebInfo>:-E> $<$<CONFIG:RelWithDebInfo>:copy> $<$<CONFIG:RelWithDebInfo>:$<TARGET_FILE:GeistStarterProject>> $<$<CONFIG:RelWithDebInfo>:"${CMAKE_CURRENT_SOURCE_DIR}/Redist/">
+            COMMAND $<$<CONFIG:RelWithDebInfo>:${CMAKE_COMMAND}> $<$<CONFIG:RelWithDebInfo>:-E> $<$<CONFIG:RelWithDebInfo>:copy> $<$<CONFIG:RelWithDebInfo>:$<TARGET_PDB_FILE:GeistStarterProject>> $<$<CONFIG:RelWithDebInfo>:"${CMAKE_CURRENT_SOURCE_DIR}/Redist/">
+            COMMAND_EXPAND_LISTS
+            COMMENT "Copying RelWithDebInfo executable and PDB to Redist folder"
+    )
+else()
+    # On Linux/Unix, set runtime output directory to Redist
+    set_target_properties(GeistStarterProject PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/Redist"
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_SOURCE_DIR}/Redist"
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_SOURCE_DIR}/Redist"
+            OUTPUT_NAME_DEBUG "GeistStarterProject_Debug"
+            OUTPUT_NAME_RELEASE "GeistStarterProject"
+    )
+endif()
+
+# Set as Visual Studio startup project
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT GeistStarterProject)
