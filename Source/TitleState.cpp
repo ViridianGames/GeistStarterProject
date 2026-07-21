@@ -7,9 +7,9 @@
 
 using namespace std;
 
-void TitleState::Init(const std::string& configfile)
+void TitleState::Init(const std::string& /*configfile*/)
 {
-
+	m_DrawCursor = true;
 }
 
 void TitleState::Shutdown()

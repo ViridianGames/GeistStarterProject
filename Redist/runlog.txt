@@ -1,10 +1,14 @@
- Mon Jul 20 14:54:07 2026.522 Starting Engine::Init()
- Mon Jul 20 14:54:07 2026.523 Starting StateMachine::Init
- Mon Jul 20 14:54:07 2026.523 Leaving StateMachine::Init
- Mon Jul 20 14:54:07 2026.523 Starting InputSystem::Init()
- Mon Jul 20 14:54:07 2026.523 Done With InputSystem::Init()
- Mon Jul 20 14:54:07 2026.663 Done with Engine::Init()
- Mon Jul 20 14:54:07 2026.664 Created state TitleState with ID 0
- Mon Jul 20 14:54:07 2026.664 Created state MainState with ID 1
- Mon Jul 20 14:54:07 2026.664 Created state OptionsState with ID 2
- Mon Jul 20 14:54:07 2026.664 StateMachine: Transitioning to state TitleState, ID 0
+ Tue Jul 21 10:54:05 2026.415 Starting Engine::Init()
+ Tue Jul 21 10:54:05 2026.415 Starting StateMachine::Init
+ Tue Jul 21 10:54:05 2026.415 Leaving StateMachine::Init
+ Tue Jul 21 10:54:05 2026.415 Starting InputSystem::Init()
+ Tue Jul 21 10:54:05 2026.415 Done With InputSystem::Init()
+ Tue Jul 21 10:54:05 2026.482 Done with Engine::Init()
+ Tue Jul 21 10:54:05 2026.483 Loading texture Images/pointer.png on the fly!
+ Tue Jul 21 10:54:05 2026.483 Loading texture Images/pointer.png
+ Tue Jul 21 10:54:05 2026.483 Texture ID: 6, Width: 16, Height: 32
+ Tue Jul 21 10:54:05 2026.483 Load successful.
+ Tue Jul 21 10:54:05 2026.483 Created state TitleState with ID 0
+ Tue Jul 21 10:54:05 2026.483 Created state MainState with ID 1
+ Tue Jul 21 10:54:05 2026.483 Created state OptionsState with ID 2
+ Tue Jul 21 10:54:05 2026.483 StateMachine: Transitioning to state TitleState, ID 0

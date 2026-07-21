@@ -9,6 +9,7 @@
 
 #include "Geist/Globals.h"
 #include "Geist/Engine.h"
+#include "Geist/ResourceManager.h"
 #include "Geist/StateMachine.h"
 #include "raylib.h"
 #include <string>
@@ -74,8 +75,18 @@ int main(int argv, char** argc)
 	// Create global objects
 	g_drawScale = g_Engine->m_ScreenHeight / g_Engine->m_RenderHeight;
 
-	g_font = make_shared<Font>(LoadFontEx("Fonts/softsquare.ttf", 9, NULL, 0));
-	g_smallFont = make_shared<Font>(LoadFontEx("Fonts/littleleague.ttf", 7, NULL, 0));
+	// Pixel fonts: FONT_BITMAP at draw size (see LoadPixelFont in Geist/Globals).
+	g_font = make_shared<Font>(LoadPixelFont("Fonts/softsquare.ttf", 9));
+	g_smallFont = make_shared<Font>(LoadPixelFont("Fonts/littleleague.ttf", 7));
+
+	// Custom mouse cursor (drawn by StateMachine in virtual resolution).
+	HideCursor();
+	g_Cursor = g_ResourceManager->GetTexture("Images/pointer.png", false);
+	if (g_Cursor && g_Cursor->id != 0)
+	{
+		SetTextureFilter(*g_Cursor, TEXTURE_FILTER_POINT);
+		SetTextureWrap(*g_Cursor, TEXTURE_WRAP_CLAMP);
+	}
 
    // Create and register our example state
    TitleState* titleState = new TitleState();

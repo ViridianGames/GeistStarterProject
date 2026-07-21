@@ -91,6 +91,10 @@ void ResourceManager::AddTexture(const std::string& textureName, bool mipmaps)
 	}
 	else
 	{
+		// Sprites: nearest sampling + clamp edges. Default REPEAT wraps the top
+		// row onto the bottom edge when scaled (looks like a duplicated line).
+		SetTextureFilter(*tex, TEXTURE_FILTER_POINT);
+		SetTextureWrap(*tex, TEXTURE_WRAP_CLAMP);
 		Log("Load successful.");
 	}
 }
@@ -99,6 +103,12 @@ void ResourceManager::AddTexture(Image& image, const std::string& textureName, b
 {
 	Log("Loading texture " + textureName);
 	m_TextureList[textureName] = std::make_unique<Texture>(LoadTextureFromImage(image));
+	Texture* tex = m_TextureList[textureName].get();
+	if (tex && tex->id != 0)
+	{
+		SetTextureFilter(*tex, TEXTURE_FILTER_POINT);
+		SetTextureWrap(*tex, TEXTURE_WRAP_CLAMP);
+	}
 	Log("Load successful.");
 }
 

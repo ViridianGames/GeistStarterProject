@@ -1,4 +1,6 @@
 #include <Geist/StateMachine.h>
+#include <Geist/Globals.h>
+#include <Geist/Engine.h>
 #include <Geist/Logging.h>
 #include <raylib.h>
 
@@ -72,6 +74,18 @@ void StateMachine::Draw()
 		{
 			// Only draw the topmost state
 			topState->Draw();
+		}
+
+		// Custom cursor in virtual render space (Engine draws states into the RT).
+		if (topState->m_DrawCursor && g_Cursor != nullptr && g_Cursor->id != 0 && g_Engine)
+		{
+			const float mx = static_cast<float>(GetMouseX())
+				* static_cast<float>(g_Engine->m_RenderWidth)
+				/ static_cast<float>(g_Engine->m_ScreenWidth);
+			const float my = static_cast<float>(GetMouseY())
+				* static_cast<float>(g_Engine->m_RenderHeight)
+				/ static_cast<float>(g_Engine->m_ScreenHeight);
+			DrawTextureEx(*g_Cursor, { mx, my }, 0.0f, 1.0f, WHITE);
 		}
 	}
 }

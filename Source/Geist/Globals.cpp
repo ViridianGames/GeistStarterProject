@@ -18,6 +18,50 @@ unique_ptr<ScriptingSystem>  g_ScriptingSystem;
 unique_ptr<SoundSystem>      g_SoundSystem;
 unique_ptr<InputSystem>      g_InputSystem;
 
+Texture* g_Cursor = nullptr;
+
+Font LoadPixelFont(const char* path, int pixelHeight)
+{
+	// LoadFontEx defaults to anti-aliased glyphs; at 7–9px that often yields empty
+	// "white square" tofu for some characters. FONT_BITMAP + POINT filter fixes it.
+	int codepoints[95];
+	for (int i = 0; i < 95; ++i)
+		codepoints[i] = 32 + i; // ' ' .. '~'
+
+	Font font = { 0 };
+	int dataSize = 0;
+	unsigned char* fileData = LoadFileData(path, &dataSize);
+	if (fileData == nullptr || dataSize <= 0)
+	{
+		TraceLog(LOG_WARNING, "LoadPixelFont: failed to read %s", path);
+		return GetFontDefault();
+	}
+
+	font.baseSize = pixelHeight;
+	font.glyphCount = 95;
+	font.glyphPadding = 1;
+	font.glyphs = LoadFontData(fileData, dataSize, pixelHeight, codepoints, 95, FONT_BITMAP);
+	UnloadFileData(fileData);
+
+	if (font.glyphs == nullptr)
+	{
+		TraceLog(LOG_WARNING, "LoadPixelFont: LoadFontData failed for %s", path);
+		return GetFontDefault();
+	}
+
+	Image atlas = GenImageFontAtlas(font.glyphs, &font.recs, font.glyphCount, font.baseSize,
+		font.glyphPadding, 0);
+	font.texture = LoadTextureFromImage(atlas);
+	UnloadImage(atlas);
+
+	if (font.texture.id != 0)
+	{
+		SetTextureFilter(font.texture, TEXTURE_FILTER_POINT);
+		SetTextureWrap(font.texture, TEXTURE_WRAP_CLAMP);
+	}
+	return font;
+}
+
 void DrawStringCentered(Font* font, float fontsize, std::string text, float centerx, float centery, Color color)
 {
 	DrawStringCentered(font, fontsize, text, Vector2{centerx, centery}, color);
