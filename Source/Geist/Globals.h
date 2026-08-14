@@ -27,8 +27,9 @@ extern Texture* g_Cursor;
 
 //  Global functions
 
-// Load ChevyRay-style pixel TTFs as crisp bitmaps (no FreeType AA / missing-glyph boxes).
-// Draw with font.baseSize and TEXTURE_FILTER_POINT (already set here).
+// Load ChevyRay-style pixel TTFs as crisp bitmaps (FONT_BITMAP, no AA holes).
+// Bake at the on-screen pixel height; always DrawTextEx / DrawOutlinedText at font.baseSize.
+// Example: LoadPixelFont("Fonts/softsquare.ttf", 9) and LoadPixelFont("Fonts/littleleague.ttf", 7).
 Font LoadPixelFont(const char* path, int pixelHeight);
 
 void DrawStringCentered(Font* font, float fontsize, std::string text, float centerx, float centery,  Color color = WHITE);

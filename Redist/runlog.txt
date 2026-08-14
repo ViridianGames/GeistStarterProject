@@ -1,14 +1,15 @@
- Tue Jul 21 10:54:05 2026.415 Starting Engine::Init()
- Tue Jul 21 10:54:05 2026.415 Starting StateMachine::Init
- Tue Jul 21 10:54:05 2026.415 Leaving StateMachine::Init
- Tue Jul 21 10:54:05 2026.415 Starting InputSystem::Init()
- Tue Jul 21 10:54:05 2026.415 Done With InputSystem::Init()
- Tue Jul 21 10:54:05 2026.482 Done with Engine::Init()
- Tue Jul 21 10:54:05 2026.483 Loading texture Images/pointer.png on the fly!
- Tue Jul 21 10:54:05 2026.483 Loading texture Images/pointer.png
- Tue Jul 21 10:54:05 2026.483 Texture ID: 6, Width: 16, Height: 32
- Tue Jul 21 10:54:05 2026.483 Load successful.
- Tue Jul 21 10:54:05 2026.483 Created state TitleState with ID 0
- Tue Jul 21 10:54:05 2026.483 Created state MainState with ID 1
- Tue Jul 21 10:54:05 2026.483 Created state OptionsState with ID 2
- Tue Jul 21 10:54:05 2026.483 StateMachine: Transitioning to state TitleState, ID 0
+ Fri Aug 14 11:34:37 2026.798 Starting Engine::Init()
+ Fri Aug 14 11:34:37 2026.798 Starting StateMachine::Init
+ Fri Aug 14 11:34:37 2026.798 Leaving StateMachine::Init
+ Fri Aug 14 11:34:37 2026.799 Starting InputSystem::Init()
+ Fri Aug 14 11:34:37 2026.799 Done With InputSystem::Init()
+ Fri Aug 14 11:34:37 2026.949 Done with Engine::Init()
+ Fri Aug 14 11:34:37 2026.949 Loading texture Images/pointer.png on the fly!
+ Fri Aug 14 11:34:37 2026.949 Loading texture Images/pointer.png
+ Fri Aug 14 11:34:37 2026.950 Texture ID: 6, Width: 16, Height: 32
+ Fri Aug 14 11:34:37 2026.950 Load successful.
+ Fri Aug 14 11:34:37 2026.950 Created state TitleState with ID 0
+ Fri Aug 14 11:34:37 2026.950 Created state MainState with ID 1
+ Fri Aug 14 11:34:37 2026.950 Created state OptionsState with ID 2
+ Fri Aug 14 11:34:37 2026.950 StateMachine: Transitioning to state TitleState, ID 0
+ Fri Aug 14 11:34:43 2026.783 StateMachine: Transitioning to state MainState, ID 1

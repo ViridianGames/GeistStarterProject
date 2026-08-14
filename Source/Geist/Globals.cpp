@@ -22,11 +22,28 @@ Texture* g_Cursor = nullptr;
 
 Font LoadPixelFont(const char* path, int pixelHeight)
 {
-	// LoadFontEx defaults to anti-aliased glyphs; at 7–9px that often yields empty
-	// "white square" tofu for some characters. FONT_BITMAP + POINT filter fixes it.
+	// Canonical pixel-TTF recipe (CivilizationRevisited / LittleWars / this starter):
+	//
+	//   1. FONT_BITMAP  — LoadFontEx anti-aliases; at 7–9px glyphs go empty or break.
+	//   2. Bake height  — the *on-screen* size (e.g. 9 and 7). Do not bake huge and scale.
+	//   3. POINT filter — keeps edges crisp when the virtual buffer is stretched.
+	//   4. Draw at font.baseSize only — never DrawTextEx at a different height.
+	//
+	// Call sites:
+	//   g_font      = LoadPixelFont("Fonts/softsquare.ttf", 9);
+	//   g_smallFont = LoadPixelFont("Fonts/littleleague.ttf", 7);
+	//   DrawOutlinedText(g_font, text, pos, g_font->baseSize, 1, WHITE);
+	//
+	if (pixelHeight < 1)
+	{
+		pixelHeight = 1;
+	}
+
 	int codepoints[95];
 	for (int i = 0; i < 95; ++i)
+	{
 		codepoints[i] = 32 + i; // ' ' .. '~'
+	}
 
 	Font font = { 0 };
 	int dataSize = 0;
@@ -40,6 +57,7 @@ Font LoadPixelFont(const char* path, int pixelHeight)
 	font.baseSize = pixelHeight;
 	font.glyphCount = 95;
 	font.glyphPadding = 1;
+	// Older raylib: no glyphCount out-param. Newer builds may need &glyphCount — see LittleWars.
 	font.glyphs = LoadFontData(fileData, dataSize, pixelHeight, codepoints, 95, FONT_BITMAP);
 	UnloadFileData(fileData);
 
@@ -49,8 +67,13 @@ Font LoadPixelFont(const char* path, int pixelHeight)
 		return GetFontDefault();
 	}
 
-	Image atlas = GenImageFontAtlas(font.glyphs, &font.recs, font.glyphCount, font.baseSize,
-		font.glyphPadding, 0);
+	Image atlas = GenImageFontAtlas(
+		font.glyphs,
+		&font.recs,
+		font.glyphCount,
+		font.baseSize,
+		font.glyphPadding,
+		0);
 	font.texture = LoadTextureFromImage(atlas);
 	UnloadImage(atlas);
 

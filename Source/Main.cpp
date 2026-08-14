@@ -75,7 +75,7 @@ int main(int argv, char** argc)
 	// Create global objects
 	g_drawScale = g_Engine->m_ScreenHeight / g_Engine->m_RenderHeight;
 
-	// Pixel fonts: FONT_BITMAP at draw size (see LoadPixelFont in Geist/Globals).
+	// Pixel fonts — always bake at draw size and draw at baseSize (see LoadPixelFont).
 	g_font = make_shared<Font>(LoadPixelFont("Fonts/softsquare.ttf", 9));
 	g_smallFont = make_shared<Font>(LoadPixelFont("Fonts/littleleague.ttf", 7));
 
